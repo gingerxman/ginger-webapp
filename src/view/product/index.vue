@@ -33,14 +33,18 @@
 		</div>
 	</van-panel>
 
-	<van-goods-action>
+	<van-goods-action safe-area-inset-bottom>
 		<!-- <van-goods-action-icon icon="chat-o" @click="sorry">
 		客服
 		</van-goods-action-icon> -->
-		<van-goods-action-icon icon="cart-o" @click="onClickCart">
+		<van-goods-action-icon v-if="shoppingCartProductCount > 0" icon="cart-o" :info="shoppingCartProductCount" @click="onClickCart">
 		购物车
 		</van-goods-action-icon>
-		<van-goods-action-button type="warning" @click="sorry">
+		<van-goods-action-icon v-else icon="cart-o" @click="onClickCart">
+		购物车
+		</van-goods-action-icon>
+
+		<van-goods-action-button type="warning" @click="onClickAddProductToShoppingCart">
 		加入购物车
 		</van-goods-action-button>
 		<van-goods-action-button type="danger" @click="sorry">
@@ -66,6 +70,7 @@ import {
 	GoodsActionButton
 } from 'vant';
 import ProductService from '@/service/product_service'
+import ShoppingCartService from '@/service/shopping_cart_service'
 
 export default {
 	components: {
@@ -84,7 +89,8 @@ export default {
 
 	data() {
 		return {
-			product: null
+			product: null,
+			shoppingCartProductCount: 0
 		};
 	},
 
@@ -92,6 +98,7 @@ export default {
 		setTimeout(async () => {
 			let productId = this.$route.query.id;
 			this.product = await ProductService.getProduct(productId)
+			this.shoppingCartProductCount = await ShoppingCartService.getProductCount()
 		})
 	},
 
@@ -102,6 +109,13 @@ export default {
 
 		onClickCart() {
 			this.$router.push('cart');
+		},
+
+		async onClickAddProductToShoppingCart() {
+			let newCount = await ShoppingCartService.addProduct(this.product.id, "standard", 1)
+			if (newCount > 0) {
+				this.shoppingCartProductCount = newCount;
+			}
 		},
 
 		sorry() {
