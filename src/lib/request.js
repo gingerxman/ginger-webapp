@@ -46,7 +46,15 @@ service.interceptors.request.use(config => {
 
 // response interceptor
 service.interceptors.response.use((response) => {
-  return response.data
+	let respData = response.data;
+	if (respData.code != 200) {
+		return Promise.reject({
+			errCode: respData.errCode,
+			errMsg: respData.errMsg
+		})
+	} else {
+		return respData
+	}
 }, err)
 
 const installer = {

@@ -33,6 +33,7 @@
 		</van-cell-group>
 
 		<van-cell-group>
+			<van-cell icon="location-o" title="收货地址" is-link to="/ship_infos" />
 			<van-cell icon="points" title="我的积分" is-link />
 			<van-cell icon="gold-coin-o" title="我的优惠券" is-link />
 			<van-cell icon="gift-o" title="我收到的礼物" is-link />

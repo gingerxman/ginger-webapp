@@ -49,6 +49,41 @@ const routes = [
     meta: {
       title: '商品详情'
     }
+  },
+  {
+    name: 'purchase',
+    component: () => import('./view/purchase'),
+    meta: {
+      title: '下单'
+    }
+  },
+  {
+    name: 'payment',
+    component: () => import('./view/payment'),
+    meta: {
+      title: '支付'
+    }
+  },
+  {
+    name: 'order',
+    component: () => import('./view/order'),
+    meta: {
+      title: '订单详情'
+    }
+  },
+  {
+    name: 'ship_infos',
+    component: () => import('./view/ship_infos'),
+    meta: {
+      title: '我的收货地址'
+    }
+  },
+  {
+    name: 'ship_info',
+    component: () => import('./view/ship_info'),
+    meta: {
+      title: '收货地址'
+    }
   }
 ];
 

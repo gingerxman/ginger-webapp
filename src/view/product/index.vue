@@ -47,7 +47,7 @@
 		<van-goods-action-button type="warning" @click="onClickAddProductToShoppingCart">
 		加入购物车
 		</van-goods-action-button>
-		<van-goods-action-button type="danger" @click="sorry">
+		<van-goods-action-button type="danger" @click="onClickBuy">
 		立即购买
 		</van-goods-action-button>
 	</van-goods-action>
@@ -90,7 +90,9 @@ export default {
 	data() {
 		return {
 			product: null,
-			shoppingCartProductCount: 0
+			shoppingCartProductCount: 0,
+			purchaseCount: 1,
+			skuName: ''
 		};
 	},
 
@@ -98,6 +100,10 @@ export default {
 		setTimeout(async () => {
 			let productId = this.$route.query.id;
 			this.product = await ProductService.getProduct(productId)
+			if (this.product.skus.length == 1 && this.product.skus[0].name == 'standard') {
+				this.skuName = this.product.skus[0].name;
+			}
+
 			this.shoppingCartProductCount = await ShoppingCartService.getProductCount()
 		})
 	},
@@ -112,10 +118,21 @@ export default {
 		},
 
 		async onClickAddProductToShoppingCart() {
-			let newCount = await ShoppingCartService.addProduct(this.product.id, "standard", 1)
+			let newCount = await ShoppingCartService.addProduct(this.product.id, this.skuName, this.purchaseCount)
 			if (newCount > 0) {
 				this.shoppingCartProductCount = newCount;
 			}
+		},
+
+		onClickBuy() {
+			let product = this.product;
+			let productsData = `${product.id}.${this.purchaseCount}.${this.skuName}`
+			this.$router.push({
+				path: '/purchase',
+				query: {
+					products: productsData
+				}
+			})
 		},
 
 		sorry() {
