@@ -65,10 +65,24 @@ const routes = [
     }
   },
   {
+    name: 'payment_result',
+    component: () => import('./view/payment_result'),
+    meta: {
+      title: '支付结果'
+    }
+  },
+  {
     name: 'order',
     component: () => import('./view/order'),
     meta: {
       title: '订单详情'
+    }
+  },
+  {
+    name: 'orders',
+    component: () => import('./view/orders'),
+    meta: {
+      title: '订单列表'
     }
   },
   {

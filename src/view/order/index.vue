@@ -89,9 +89,6 @@ import {
 	Notify
 } from 'vant';
 import OrderService from '@/service/order_service'
-import MallService from '@/service/mall_service'
-import Vue from 'vue'
-// import ShoppingCartService from '@/service/shopping_cart_service'
 
 export default {
 	components: {

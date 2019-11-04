@@ -15,8 +15,6 @@ import {
 	Toast
 } from 'vant';
 import OrderService from '@/service/order_service'
-import Vue from 'vue'
-// import ShoppingCartService from '@/service/shopping_cart_service'
 
 export default {
 	components: {
@@ -59,7 +57,7 @@ export default {
 
 				setTimeout(() => {
 					this.$router.push({
-						path: '/order',
+						path: '/payment_result',
 						query: {
 							bid: this.orderBid
 						}

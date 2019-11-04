@@ -29,7 +29,7 @@
 		</van-row>
 
 		<van-cell-group class="user-group">
-			<van-cell icon="records" title="全部订单" is-link />
+			<van-cell icon="records" title="全部订单" is-link to="/orders" />
 		</van-cell-group>
 
 		<van-cell-group>

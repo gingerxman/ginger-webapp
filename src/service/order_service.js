@@ -75,6 +75,22 @@ class OrderService extends Service {
 			return null
 		}
 	}
+
+	async getOrders(type) {
+		try {
+			let resp = await Resource.get({
+				resource: 'ginger-mall:order.user_orders',
+				data: {
+					"__f-status": type
+				}
+			})
+
+			return resp.data.orders;
+		} catch(e) {
+			console.error(e)
+			return []
+		}
+	}
 }
 
 let service = new OrderService();
