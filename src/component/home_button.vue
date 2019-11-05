@@ -3,8 +3,13 @@
 </template>
 
 <script>
+import {
+	Toast
+} from 'vant';
+
 export default {
 	components: {
+		[Toast.name]: Toast,
 	},
 
 	data() {
@@ -18,9 +23,14 @@ export default {
 
 	methods: {
 		onClickGotoLoginPage() {
-			this.$router.replace({
-				path: '/dev-login'
-			})
+			let isDevLoginPage = (window.location.href.indexOf('#/dev-login') != -1)
+			if (isDevLoginPage) {
+				Toast('请先登录')
+			} else {
+				this.$router.replace({
+					path: '/mall'
+				})
+			}
 		}
 	}
 }

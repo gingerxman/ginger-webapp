@@ -39,12 +39,16 @@
 			<van-cell icon="gift-o" title="我收到的礼物" is-link />
 		</van-cell-group>
 
+		<div class="x-i-logout">
+			<van-button type="danger" size="small" to="/dev-login">退出登录</van-button>
+		</div>
+
 		<bottom-nav :active="3" />
 	</div>
 </template>
 
 <script>
-import { Row, Col, Icon, Cell, CellGroup } from 'vant';
+import { Row, Col, Icon, Cell, CellGroup, Button } from 'vant';
 import BottomNav from '@/view/component/bottom_nav'
 import UserService from '@/service/user_service'
 
@@ -56,6 +60,7 @@ export default {
 		[Cell.name]: Cell,
 		[CellGroup.name]: CellGroup,
 		[BottomNav.name]: BottomNav,
+		[Button.name]: Button,
 	},
 
 	data () {
@@ -71,6 +76,7 @@ export default {
 
 <style lang="less">
 .x-page-user {
+	padding-bottom: 70px;
 	.x-i-header {
 		background-color: #E7270E;
 		width: 100%;
@@ -99,6 +105,15 @@ export default {
 			font-size: 1.1em;
 			margin: 5px auto;
 			width: 40px;
+		}
+	}
+
+	.x-i-logout {
+		margin-top:20px;
+		text-align:center;
+
+		.van-button {
+			width: 90%;
 		}
 	}
 }

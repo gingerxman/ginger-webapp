@@ -15,13 +15,23 @@
 			<van-tab name="review" title="待评价"></van-tab>
 		</van-tabs>
 
-		<div class="x-i-orders">
-			<order-card
-				v-for="order in orders"
-				:key="order.id"
-				:order="order"
-			/>
-		</div>
+		<van-pull-refresh v-model="isPullLoading" @refresh="onRefresh" class="x-i-orders">
+			<van-list
+				v-model="loading"
+				:finished="finished"
+				finished-text="我是有底线的"
+				@load="onLoad"
+				:immediate-check="false"
+				class="van-clearfix"
+			>
+				<order-card
+					class="van-clearfix"
+					v-for="order in orders"
+					:key="order.id"
+					:order="order"
+				/>
+			</van-list>
+		</van-pull-refresh>
 	</div>
 </template>
 
@@ -29,7 +39,9 @@
 import {
 	NavBar,
 	Tab,
-	Tabs
+	Tabs,
+	List,
+	PullRefresh
 } from 'vant';
 import OrderService from '@/service/order_service';
 import OrderCard from './order_card'
@@ -39,12 +51,19 @@ export default {
 		[NavBar.name]: NavBar,
 		[Tab.name]: Tab,
 		[Tabs.name]: Tabs,
+		[List.name]: List,
+		[PullRefresh.name]: PullRefresh,
 		[OrderCard.name]: OrderCard
 	},
 
 	data () {
+		this.isFrozen = false;
 		return {
+			orderType: 'all',
 			orders: [],
+			loading: false,
+			finished: false,
+			isPullLoading: false,
 			activeTab: 0
 		}
 	},
@@ -55,19 +74,53 @@ export default {
 
 	mounted () {
 		setTimeout(async () => {
-			this.orders = await OrderService.getOrders('all')
-			console.log(this.orders)
+			await this.loadOrders(true)
 		})
 	},
 
 	methods: {
+		async loadOrders(reset=false) {
+			if (reset) {
+				OrderService.reset()
+			}
+			let { orders, finished } = await OrderService.getOrders(this.orderType)
+			if (reset) {
+				this.orders = [...orders];
+			} else {
+				let id2order = {}
+				this.orders.forEach(order => {
+					id2order[order.id] = true
+				})
+				let newOrders = orders.filter(order => {
+					return !id2order[order.id]
+				})
+				if (newOrders.length > 0) {
+					this.orders = [...this.orders, ...orders];
+				}
+			}
+			this.finished = finished;
+			this.loading = false;
+			this.isPullLoading = false;
+		},
+
+		async onRefresh() {
+			setTimeout(async () => {
+				await this.loadOrders(true)
+			}, 1000)
+		},
+
+		async onLoad() {
+			console.log("load")
+			await this.loadOrders(false)
+		},
+
 		onClickLeft() {
 			this.$router.go(-1)
 		},
 
 		async onChangeTab(name) {
-			let type = name;
-			this.orders = await OrderService.getOrders(type)
+			this.orderType = name;
+			await this.loadOrders(true)
 		}
 	}
 }

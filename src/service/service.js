@@ -70,6 +70,10 @@ class ObjectsCache {
 	get(id) {
 		return this.id2object[id];
 	}
+
+	contains(id) {
+		return this.id2object.hasOwnProperty(id)
+	}
 }
 
 class Service {
@@ -77,7 +81,7 @@ class Service {
 		console.log('create base service');
 		this.resource2pageinfo = {};
 		this.resource2cache = {};
-		this.id2object = {};
+		// this.id2object = {};
 	}
 
 	updatePageInfo(resource, pageinfoData) {
@@ -103,11 +107,18 @@ class Service {
 	getCache(resource) {
 		let cache = this.resource2cache[resource];
 		if (!cache) {
-			cache = new ObjectsCache(resource, this.id2object);
+			cache = new ObjectsCache(resource, {});
 			this.resource2cache[resource] = cache;
 		}
 
 		return cache;
+	}
+
+	filterCachedObjects(resource, objs) {
+		let cache = this.getCache(resource);
+		return objs.filter(obj => {
+			return !cache.contains(obj.id)
+		})
 	}
 
 	getStaticPageInfo(resource, countPerPage=20) {
@@ -132,8 +143,6 @@ class Service {
 			this.resource2pageinfo = {};
 			this.resource2cache = {};
 		}
-		console.debug(this.resource2pageinfo);
-		console.debug(this.resource2cache);
 	}
 }
 

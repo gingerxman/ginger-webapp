@@ -114,7 +114,7 @@ export default {
 
 	methods: {
 		formatPrice(price) {
-			return '¥' + price;
+			return price;
 		},
 
 		onClickProduct(product) {

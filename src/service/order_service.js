@@ -78,17 +78,28 @@ class OrderService extends Service {
 
 	async getOrders(type) {
 		try {
+			let resource = 'ginger-mall:order.user_orders';
+			let pageinfo = this.getPageInfo(resource, 3)
 			let resp = await Resource.get({
-				resource: 'ginger-mall:order.user_orders',
+				resource: resource,
 				data: {
-					"__f-status": type
+					"__f-status": type,
+					_p_from: pageinfo.nextFromId,
+					_p_count: pageinfo.countPerPage,
 				}
 			})
 
-			return resp.data.orders;
+			this.updatePageInfo(resource, resp.data.page_info)
+			return {
+				orders: resp.data.orders,
+				finished: !resp.data.page_info.has_next
+			}
 		} catch(e) {
 			console.error(e)
-			return []
+			return {
+				orders: [], 
+				finished: true
+			}
 		}
 	}
 }
