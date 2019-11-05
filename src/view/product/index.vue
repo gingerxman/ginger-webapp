@@ -44,13 +44,23 @@
 		购物车
 		</van-goods-action-icon>
 
-		<van-goods-action-button type="warning" @click="onClickAddProductToShoppingCart">
+		<van-goods-action-button type="warning" @click="onClickAddNoneSkuToCart">
 		加入购物车
 		</van-goods-action-button>
-		<van-goods-action-button type="danger" @click="onClickBuy">
+		<van-goods-action-button type="danger" @click="onClickBuyNoneSku">
 		立即购买
 		</van-goods-action-button>
 	</van-goods-action>
+
+	<van-sku
+		v-model="showSku"
+		:sku="sku"
+		:goods="goods"
+		:goods-id="goodsId"
+		:hide-stock="sku.hide_stock"
+		@buy-clicked="onClickBuySku"
+		@add-cart="onClickAddSkuToCart"
+	/>
 </div>
 </template>
 
@@ -67,7 +77,8 @@ import {
 	SwipeItem,
 	GoodsAction,
 	GoodsActionIcon,
-	GoodsActionButton
+	GoodsActionButton,
+	Sku
 } from 'vant';
 import ProductService from '@/service/product_service'
 import ShoppingCartService from '@/service/shopping_cart_service'
@@ -78,6 +89,7 @@ export default {
 		[Panel.name]: Panel,
 		[Col.name]: Col,
 		[Icon.name]: Icon,
+		[Sku.name]: Sku,
 		[Cell.name]: Cell,
 		[CellGroup.name]: CellGroup,
 		[Swipe.name]: Swipe,
@@ -92,8 +104,36 @@ export default {
 			product: null,
 			shoppingCartProductCount: 0,
 			purchaseCount: 1,
-			skuName: ''
+			skuName: '971:2046_972:2048',
+
+			showSku: false,
+			goods: {},
+			goodsId: 0,
+			sku: {
+				tree: [],
+				list: [],
+				price: '0.00', // 默认价格（单位元）
+				stock_num: 0, // 商品总库存
+				none_sku: false, // 是否无规格商品
+				messages: [
+				],
+				hide_stock: false // 是否隐藏剩余库存
+			}
 		};
+	},
+
+	computed: {
+		isSkuProduct() {
+			if (!this.product) {
+				return false;
+			}
+
+			if (this.product.skus.length == 1 && this.product.skus[0].name == 'standard') {
+				return false;
+			} else {
+				return true;
+			}
+		}
 	},
 
 	mounted() {
@@ -104,35 +144,120 @@ export default {
 				this.skuName = this.product.skus[0].name;
 			}
 
-			this.shoppingCartProductCount = await ShoppingCartService.getProductCount()
+			this.goods = {
+				name: this.product.base_info.name,
+				picture: this.product.base_info.thumbnail
+			}
+			this.goodsId = this.product.base_info.id;
+
+			this.buildSku();
+
+			this.shoppingCartProductCount = await ShoppingCartService.getProductCount();
 		})
 	},
 
 	methods: {
+		buildSku () {
+			let keys = [];
+			let key2values = {};
+			let list = [];
+			this.product.skus.forEach(sku => {
+				let property2value = {}
+				keys = sku.property_values.map(propertyValue => {
+					return {
+						id: propertyValue.property_id,
+						name: propertyValue.property_name
+					}
+				})
+				sku.property_values.forEach(propertyValue => {
+					let values = key2values[propertyValue.property_name];
+					if (!values) {
+						values = [];
+						key2values[propertyValue.property_name] = values;
+					}
+
+					values.push({
+						id: propertyValue.id,
+						name: propertyValue.text,
+						imgUrl: propertyValue.image,
+						previewImgUrl: propertyValue.image,
+					})
+
+					let keyStr = `property_${propertyValue.property_id}`
+					property2value[keyStr] = propertyValue.id
+				})
+
+				list.push({
+					...property2value,
+					id: sku.name,
+					price: sku.price * 100,
+					stock_num: sku.stocks
+				})
+			})
+
+			let properties = []
+			keys.forEach(key => {
+				properties.push({
+					k: key.name,
+					v: key2values[key.name],
+					k_s: `property_${key.id}`
+				})
+			})
+
+			this.sku.tree = properties;
+			this.sku.list = list;
+		},
+
 		formatPrice() {
 			return '¥' + (this.product.price / 100).toFixed(2);
 		},
 
-		onClickCart() {
-			this.$router.push('cart');
-		},
-
-		async onClickAddProductToShoppingCart() {
-			let newCount = await ShoppingCartService.addProduct(this.product.id, this.skuName, this.purchaseCount)
-			if (newCount > 0) {
-				this.shoppingCartProductCount = newCount;
-			}
-		},
-
-		onClickBuy() {
-			let product = this.product;
-			let productsData = `${product.id}.${this.purchaseCount}.${this.skuName}`
+		buyProduct(skuName, count) {
+			let productsData = `${this.product.id}.${count}.${skuName}`
 			this.$router.push({
 				path: '/purchase',
 				query: {
 					products: productsData
 				}
 			})
+		},
+
+		onClickBuyNoneSku() {
+			if (this.isSkuProduct) {
+				this.showSku = true;
+			} else {
+				this.buyProduct('standard', 1)
+			}
+		},
+
+		onClickBuySku(skuData) {
+			console.log('buy')
+			console.log(skuData);
+			this.buyProduct(skuData.selectedSkuComb.id, skuData.selectedNum)
+		},
+
+		onClickCart() {
+			this.$router.push('cart');
+		},
+
+		async addProductToCart(skuName, count) {
+			let newCount = await ShoppingCartService.addProduct(this.product.id, skuName, count)
+			if (newCount > 0) {
+				this.shoppingCartProductCount = newCount;
+			}
+			Toast("添加成功")
+		},
+
+		async onClickAddNoneSkuToCart() {
+			if (this.isSkuProduct) {
+				this.showSku = true;
+			} else {
+				this.addProductToCart('standard', 1)
+			}
+		},
+
+		async onClickAddSkuToCart(skuData) {
+			this.addProductToCart(skuData.selectedSkuComb.id, skuData.selectedNum)
 		},
 
 		sorry() {

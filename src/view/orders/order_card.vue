@@ -13,7 +13,11 @@
 				:thumb="product.thumbnail"
 				:num="product.count"
 				@click="onClickProduct(product)"
-			/>
+			>
+				<div slot="tags" v-if="product.sku_display_name != 'standard'">
+					<van-tag plain type="danger">{{product.sku_display_name}}</van-tag>
+				</div>
+			</van-card>
 			<div class="x-i-sum">
 				<span>共{{totalProductCount}}件商品 合计: ¥</span> <span class="x-i-price">{{order.final_money}}</span>
 			</div>
@@ -38,7 +42,7 @@
 
 
 <script>
-import { Card, Button } from 'vant';
+import { Card, Button, Tag } from 'vant';
 
 export default {
 	name: 'order-card',
@@ -51,7 +55,8 @@ export default {
 
 	components: {
 		[Card.name]: Card,
-		[Button.name]: Button
+		[Button.name]: Button,
+		[Tag.name]: Tag,
 	},
 
 	data () {

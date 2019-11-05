@@ -23,6 +23,9 @@
 		:price="formatPrice(product.price)"
 		:thumb="product.thumbnail"
 	>
+		<div slot="tags" v-if="product.sku_display_name != 'standard'">
+			<van-tag plain type="danger">{{product.sku_display_name}}</van-tag>
+		</div>
 		<div slot="num">
 			<van-button class="x-i-countBtn" size="mini" @click.stop="increCount(product)">+</van-button>
 			<span class="x-i-count">{{product.count}}</span>
