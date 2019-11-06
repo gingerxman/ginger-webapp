@@ -56,13 +56,18 @@ class ShoppingCartService extends Service {
 				}
 			})
 
-			let products = resp.data.product_groups[0].products;
-			products = products.map(product => {
-				product.price = parseFloat(product.price);
-				return product;
-			})
+			let productGroups = resp.data.product_groups;
+			if (productGroups.length > 0) {
+				let products = resp.data.product_groups[0].products;
+				products = products.map(product => {
+					product.price = parseFloat(product.price);
+					return product;
+				})
 
-			return products;
+				return products;
+			} else {
+				return [];
+			}
 		} catch(e) {
 			console.error(e)
 			return null;

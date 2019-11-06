@@ -118,6 +118,7 @@ export default {
 		return {
 			message: '',
 			products: [],
+			cartItemIds: '',
 			shipInfo: null
 		};
 	},
@@ -132,6 +133,8 @@ export default {
 			}
 			console.log(this.shipInfo);
 			let productInfos = this.$route.query.products;
+			this.cartItemIds = this.$route.query.cart_item_ids;
+			console.log(this.$route.query)
 			let purchaseData = await OrderService.getPurchaseData(productInfos)
 			this.products = purchaseData.products;
 			console.log(this.products)
@@ -181,7 +184,8 @@ export default {
 				address: this.shipInfo.address
 			}
 
-			let order = await OrderService.createOrder(products, shipInfo, this.message)
+			console.log(this.cartItemIds)
+			let order = await OrderService.createOrder(products, this.cartItemIds, shipInfo, this.message)
 			if (order) {
 				Toast({
 					message: '下单成功，去支付~',

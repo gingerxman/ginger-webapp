@@ -26,12 +26,13 @@ class OrderService extends Service {
 		}
 	}
 
-	async createOrder(products, shipInfo, message) {
+	async createOrder(products, cartItemIds, shipInfo, message) {
 		try {
 			let resp = await Resource.put({
 				resource: 'ginger-mall:order.order',
 				data: {
 					products: JSON.stringify(products),
+					shopping_cart_item_ids: cartItemIds,
 					ship_info: JSON.stringify(shipInfo),
 					message: message
 				}

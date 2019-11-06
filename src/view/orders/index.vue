@@ -25,7 +25,7 @@
 				class="van-clearfix"
 			>
 				<order-card
-					class="van-clearfix"
+					class="van-clearfix mb10"
 					v-for="order in orders"
 					:key="order.id"
 					:order="order"
@@ -128,6 +128,8 @@ export default {
 
 <style lang="less">
 .x-page-orders {
+	margin-bottom: 10px;
+
 	.x-i-orders {
 		margin-top: 10px;
 	}

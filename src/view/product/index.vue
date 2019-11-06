@@ -104,7 +104,6 @@ export default {
 			product: null,
 			shoppingCartProductCount: 0,
 			purchaseCount: 1,
-			skuName: '971:2046_972:2048',
 
 			showSku: false,
 			goods: {},
@@ -140,9 +139,6 @@ export default {
 		setTimeout(async () => {
 			let productId = this.$route.query.id;
 			this.product = await ProductService.getProduct(productId)
-			if (this.product.skus.length == 1 && this.product.skus[0].name == 'standard') {
-				this.skuName = this.product.skus[0].name;
-			}
 
 			this.goods = {
 				name: this.product.base_info.name,
@@ -231,13 +227,16 @@ export default {
 		},
 
 		onClickBuySku(skuData) {
-			console.log('buy')
-			console.log(skuData);
 			this.buyProduct(skuData.selectedSkuComb.id, skuData.selectedNum)
 		},
 
 		onClickCart() {
-			this.$router.push('cart');
+			this.$router.push({
+				path: '/cart',
+				query: {
+					source: 'product'
+				}
+			});
 		},
 
 		async addProductToCart(skuName, count) {
@@ -246,6 +245,7 @@ export default {
 				this.shoppingCartProductCount = newCount;
 			}
 			Toast("添加成功")
+			this.showSku = false;
 		},
 
 		async onClickAddNoneSkuToCart() {
