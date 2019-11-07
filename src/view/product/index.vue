@@ -9,11 +9,11 @@
 	<van-cell-group>
 		<van-cell>
 		<div class="goods-title">{{ product.base_info.name }}</div>
-		<div class="goods-price">¥{{ product.skus[0].price }}</div>
+		<div class="goods-price">{{ formatPrice }}</div>
 		</van-cell>
 		<van-cell class="goods-express">
 		<van-col span="10">运费：免运费</van-col>
-		<van-col span="14">剩余：{{ product.skus[0].stocks }}</van-col>
+		<van-col span="14">剩余：{{ sku.stock_num }}</van-col>
 		</van-cell>
 	</van-cell-group>
 
@@ -58,6 +58,8 @@
 		:goods="goods"
 		:goods-id="goodsId"
 		:hide-stock="sku.hide_stock"
+		reset-stepper-on-hide
+		reset-selected-sku-on-hide
 		@buy-clicked="onClickBuySku"
 		@add-cart="onClickAddSkuToCart"
 	/>
@@ -108,6 +110,10 @@ export default {
 			showSku: false,
 			goods: {},
 			goodsId: 0,
+			priceRange: {
+				min: 999999999,
+				max: 0
+			},
 			sku: {
 				tree: [],
 				list: [],
@@ -131,6 +137,16 @@ export default {
 				return false;
 			} else {
 				return true;
+			}
+		},
+
+		formatPrice() {
+			let min = (this.priceRange.min / 100).toFixed(2);
+			let max = (this.priceRange.max / 100).toFixed(2);
+			if (this.priceRange.min == this.priceRange.max) {
+				return `¥${min}`
+			} else {
+				return `¥${min} - ¥${max}`
 			}
 		}
 	},
@@ -157,6 +173,7 @@ export default {
 			let keys = [];
 			let key2values = {};
 			let list = [];
+			let totalStocks = 0;
 			this.product.skus.forEach(sku => {
 				let property2value = {}
 				keys = sku.property_values.map(propertyValue => {
@@ -186,9 +203,20 @@ export default {
 				list.push({
 					...property2value,
 					id: sku.name,
-					price: sku.price * 100,
+					price: sku.price,
 					stock_num: sku.stocks
 				})
+
+				// accumulate stock
+				totalStocks += sku.stocks
+
+				//update price range
+				if (sku.price > this.priceRange.max) {
+					this.priceRange.max = sku.price;
+				}
+				if (sku.price < this.priceRange.min) {
+					this.priceRange.min = sku.price;
+				}
 			})
 
 			let properties = []
@@ -202,10 +230,7 @@ export default {
 
 			this.sku.tree = properties;
 			this.sku.list = list;
-		},
-
-		formatPrice() {
-			return '¥' + (this.product.price / 100).toFixed(2);
+			this.sku.stock_num = totalStocks;
 		},
 
 		buyProduct(skuName, count) {

@@ -101,12 +101,12 @@ export default {
 	computed: {
 		totalPrice() {
 			let price = this.products.reduce((total, item) => total + item.price*item.count, 0);
-			return price * 100;
+			return price;
 		},
 
 		productPrice() {
 			let price = this.products.reduce((total, item) => total + item.price*item.count, 0);
-			return '¥ ' + price;
+			return '¥ ' + (price / 100).toFixed(2);
 		},
 
 		postageMoney() {
@@ -149,7 +149,7 @@ export default {
 		},
 
 		formatPrice(price) {
-			return price.toFixed(2);
+			return (price / 100).toFixed(2);
 		},
 
 		increCount(product) {
@@ -184,7 +184,6 @@ export default {
 				address: this.shipInfo.address
 			}
 
-			console.log(this.cartItemIds)
 			let order = await OrderService.createOrder(products, this.cartItemIds, shipInfo, this.message)
 			if (order) {
 				Toast({

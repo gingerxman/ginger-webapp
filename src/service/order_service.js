@@ -1,5 +1,6 @@
 import { Resource } from '@/lib/resource';
 import Service from './service'
+import { Toast } from 'vant'
 
 class OrderService extends Service {
 	constructor() {
@@ -40,6 +41,9 @@ class OrderService extends Service {
 
 			return resp.data;
 		} catch(e) {
+			if (e.errCode && e.errCode == "create_order_fail:not_enough_stocks") {
+				Toast("库存不足")
+			}
 			console.error(e)
 			return null
 		}

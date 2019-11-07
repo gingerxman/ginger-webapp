@@ -12,9 +12,7 @@
 				<h2 class="x-i-promotionTitle">{{product.base_info.promotion_title}}</h2>
 			</a>
 			<div class="x-i-bottomBar">
-				<div class="x-i-price">
-					<span class="x-i-price-unit">¥</span>{{product.skus[0].price}}
-				</div>
+				<div class="x-i-price">{{formatPrice}}</div>
 			<span class="x-i-sales">已售:20</span>
 				<button type="button" class="x-i-icon-addCart"></button>
 			</div>
@@ -42,7 +40,9 @@ export default {
 	},
 
 	computed: {
-		
+		formatPrice() {
+			return '¥' + (this.product.skus[0].price / 100).toFixed(2);
+		},
 	},
 
 	methods: {

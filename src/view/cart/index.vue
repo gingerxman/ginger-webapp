@@ -88,7 +88,7 @@ export default {
 
 		totalPrice() {
 			let price = this.products.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? item.price*item.purchase_count : 0), 0);
-			return price * 100;
+			return price;
 		}
 	},
 
@@ -111,7 +111,7 @@ export default {
 		},
 
 		formatPrice(price) {
-			return price.toFixed(2);
+			return (price / 100).toFixed(2);
 		},
 
 		onSubmit() {

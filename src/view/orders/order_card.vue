@@ -100,7 +100,7 @@ export default {
 
 		totalPrice() {
 			let price = this.products.reduce((total, item) => total + (this.checkedGoods.indexOf(item.id) !== -1 ? item.price*item.purchase_count : 0), 0);
-			return price * 100;
+			return price;
 		},
 
 		totalProductCount() {
@@ -119,7 +119,7 @@ export default {
 
 	methods: {
 		formatPrice(price) {
-			return price;
+			return (price / 100).toFixed(2);
 		},
 
 		onClickProduct(product) {
@@ -136,7 +136,7 @@ export default {
 				this.$router.push({
 					path: '/payment',
 					query: {
-						money: this.order.final_money * 100,
+						money: this.order.final_money,
 						order_bid: this.order.bid,
 						order_id: this.order.id
 					}

@@ -112,7 +112,7 @@ export default {
 		totalPrice() {
 			let products = this.order.products;
 			let price = products.reduce((total, item) => total + item.price*item.count, 0);
-			return price * 100;
+			return price;
 		},
 
 		productPrice() {
