@@ -19,7 +19,7 @@ class UserService extends Service {
 				data: {}
 			})
 
-			return resp.data.users;
+			return resp.data.users.filter(user => user.name.indexOf("corp_") == -1);
 		} catch(e) {
 			console.error(e)
 			return []
