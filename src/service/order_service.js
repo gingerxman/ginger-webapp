@@ -65,6 +65,22 @@ class OrderService extends Service {
 		}
 	}
 
+	async finishInvoice(bid) {
+		try {
+			await Resource.put({
+				resource: 'ginger-mall:order.finished_invoice',
+				data: {
+					bid: bid
+				}
+			})
+
+			return true;
+		} catch(e) {
+			console.error(e)
+			return false
+		}
+	}
+
 	async getOrder(orderBid) {
 		try {
 			let resp = await Resource.get({
@@ -94,10 +110,10 @@ class OrderService extends Service {
 				}
 			})
 
-			this.updatePageInfo(resource, resp.data.page_info)
+			this.updatePageInfo(resource, resp.data.pageinfo)
 			return {
 				orders: resp.data.orders,
-				finished: !resp.data.page_info.has_next
+				finished: !resp.data.pageinfo.has_next
 			}
 		} catch(e) {
 			console.error(e)

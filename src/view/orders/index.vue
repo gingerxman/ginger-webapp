@@ -10,9 +10,9 @@
 		<van-tabs @change="onChangeTab" v-model="activeTab" sticky animated>
 			<van-tab name="all" title="全部"></van-tab>
 			<van-tab name="wait_pay" title="待付款"></van-tab>
-			<van-tab name="wait_confirm" title="待发货"></van-tab>
+			<van-tab name="wait_ship" title="待发货"></van-tab>
 			<van-tab name="shipped" title="待收货"></van-tab>
-			<van-tab name="review" title="待评价"></van-tab>
+			<van-tab name="wait_review" title="待评价"></van-tab>
 		</van-tabs>
 
 		<van-pull-refresh v-model="isPullLoading" @refresh="onRefresh" class="x-i-orders">

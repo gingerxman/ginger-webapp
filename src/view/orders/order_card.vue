@@ -5,6 +5,9 @@
 				<div class="x-i-date">{{order.created_at}}</div>
 				<div class="x-i-status">{{statusText}}</div>
 			</div>
+			<div class="x-i-bid">
+				订单编号: {{ order.bid }}
+			</div>
 			<van-card
 				v-for="product in products"
 				:key="product.id"
@@ -19,7 +22,7 @@
 				</div>
 			</van-card>
 			<div class="x-i-sum">
-				<span>共{{totalProductCount}}件商品 合计: ¥</span> <span class="x-i-price">{{order.final_money}}</span>
+				<span>共{{totalProductCount}}件商品 合计: ¥</span> <span class="x-i-price">{{formatPrice(order.final_money)}}</span>
 			</div>
 			<div class="x-i-actions">
 				<van-button
@@ -42,7 +45,8 @@
 
 
 <script>
-import { Card, Button, Tag } from 'vant';
+import { Card, Button, Tag, Toast, Dialog, Notify } from 'vant';
+import OrderService from '@/service/order_service';
 
 export default {
 	name: 'order-card',
@@ -57,6 +61,9 @@ export default {
 		[Card.name]: Card,
 		[Button.name]: Button,
 		[Tag.name]: Tag,
+		[Toast.name]: Toast,
+		[Dialog.name]: Dialog,
+		[Notify.name]: Notify
 	},
 
 	data () {
@@ -70,12 +77,22 @@ export default {
 				'review': {
 					code: 'review',
 					name: '评价',
-					type: 'danger',
+					type: 'default',
 				}, 
 				'logistics': {
 					code: 'logistics',
 					name: '查看物流',
 					type: 'default',
+				},
+				'finish': {
+					code: 'finish',
+					name: '确认收货',
+					type: 'default'
+				},
+				'reorder': {
+					code: 'reorder',
+					name: '再来一单',
+					type: 'default'
 				}
 			}
 		}
@@ -93,6 +110,9 @@ export default {
 			let status2text = {
 				"wait_confirm": "等待商家确认",
 				"wait_pay": "等待付款",
+				"wait_ship": "买家已付款",
+				"shipped": "商家已发货",
+				"finished": "交易完成"
 			}
 
 			return status2text[this.order.status] || this.order.status;
@@ -113,7 +133,13 @@ export default {
 		},
 
 		actions() {
-			return [this.name2action['pay'], this.name2action['review'], this.name2action['logistics']]
+			if (this.order.status == 'shipped') {
+				return [this.name2action['logistics'], this.name2action['finish'], this.name2action['reorder']]
+			} else if (this.order.status == 'finished') {
+				return [this.name2action['review'], this.name2action['logistics'], this.name2action['reorder']]
+			} else {
+				return [this.name2action['pay']]
+			}
 		}
 	},
 
@@ -141,8 +167,26 @@ export default {
 						order_id: this.order.id
 					}
 				})
+			} else if (action.code == 'finish') {
+				Dialog.confirm({
+					title: '确认收货',
+					message: '确认收货后，订单交易完成，钱款将立即到达商家账户'
+				}).then(() => {
+					setTimeout(async () => {
+						const isSuccess = await OrderService.finishInvoice(this.order.bid)
+						if (isSuccess) {
+							Toast("收货成功")
+							this.status = "finished"
+						} else {
+							Notify("收货失败，请稍后再试")
+						}
+					})
+					alert('confirm')
+				}).catch(() => {
+					alert('cancel')
+				});
 			} else {
-				console.log(action.code)
+				Toast(action.code)
 			}
 		}
 	}
@@ -171,6 +215,11 @@ export default {
 			.x-i-date {
 				flex: 1;
 			}
+		}
+		.x-i-bid {
+			color: #aaa;
+			font-size: 12px;
+			margin-left: 15px;
 		}
 		.van-card {
 			margin-top: 0px;
