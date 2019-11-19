@@ -46,12 +46,12 @@
 	<van-cell-group class="x-i-cellGroup">
 		<van-cell title="商品金额">
 			<template slot="default">
-				<span class="x-i-price">{{productPrice}}</span>
+				<span class="x-i-price">{{formatPrice(productPrice)}}</span>
 			</template>
 		</van-cell>
 		<van-cell title="运费">
 			<template slot="default">
-				<span class="x-i-price">{{postageMoney}}</span>
+				<span class="x-i-price">{{formatPrice(postageMoney)}}</span>
 			</template>
 		</van-cell>
 	</van-cell-group>
@@ -100,17 +100,17 @@ export default {
 
 	computed: {
 		totalPrice() {
-			let price = this.products.reduce((total, item) => total + item.price*item.count, 0);
-			return price;
+			return this.productPrice + this.postageMoney
 		},
 
 		productPrice() {
 			let price = this.products.reduce((total, item) => total + item.price*item.count, 0);
-			return '¥ ' + (price / 100).toFixed(2);
+			return price
 		},
 
 		postageMoney() {
-			return '¥ 0'
+			let postage = this.products.reduce((total, item) => total + item.logistics_info.unified_postage_money, 0)
+			return postage
 		}
 	},
 
@@ -149,7 +149,7 @@ export default {
 		},
 
 		formatPrice(price) {
-			return (price / 100).toFixed(2);
+			return '¥' + (price / 100).toFixed(2);
 		},
 
 		increCount(product) {

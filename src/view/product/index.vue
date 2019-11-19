@@ -8,12 +8,12 @@
 
 	<van-cell-group>
 		<van-cell>
-		<div class="goods-title">{{ product.base_info.name }}</div>
-		<div class="goods-price">{{ formatPrice }}</div>
+			<div class="goods-title">{{ product.base_info.name }}</div>
+			<div class="goods-price">{{ formatPrice }}</div>
 		</van-cell>
 		<van-cell class="goods-express">
-		<van-col span="10">运费：免运费</van-col>
-		<van-col span="14">剩余：{{ sku.stock_num }}</van-col>
+			<van-col span="10">运费：{{ postage }}</van-col>
+			<van-col span="14">剩余：{{ sku.stock_num }}</van-col>
 		</van-cell>
 	</van-cell-group>
 
@@ -128,6 +128,15 @@ export default {
 	},
 
 	computed: {
+		postage () {
+			const logisticsInfo = this.product.logistics_info
+			if (logisticsInfo.postage_type === 'unified') {
+				return (logisticsInfo.unified_postage_money / 100).toFixed(2)
+			} else {
+				return '免运费'
+			}
+		},
+
 		isSkuProduct() {
 			if (!this.product) {
 				return false;
