@@ -314,8 +314,6 @@ export default {
 
 <style lang="less">
 .goods {
-	padding-bottom: 50px;
-
 	&-swipe {
 		img {
 			width: 100%;

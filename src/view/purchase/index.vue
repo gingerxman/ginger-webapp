@@ -223,8 +223,6 @@ export default {
 
 <style lang="less">
 .x-page-purchase {
-	padding-bottom: 50px;
-
 	.x-i-cellGroup {
 		margin: 15px 0;
 
