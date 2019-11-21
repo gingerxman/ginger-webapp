@@ -1,9 +1,9 @@
 <template>
-	<div class="x-orderCard">  
+	<div class="x-orderCard" @click="onClickOrder">
 		<div class="x-i-card">
 			<div class="x-i-head">
 				<div class="x-i-date">{{order.created_at}}</div>
-				<div class="x-i-status">{{statusText}}</div>
+				<div class="x-i-status">{{statusInfo.text}}</div>
 			</div>
 			<div class="x-i-bid">
 				订单编号: {{ order.bid }}
@@ -15,28 +15,27 @@
 				:price="formatPrice(product.price)"
 				:thumb="product.thumbnail"
 				:num="product.count"
-				@click="onClickProduct(product)"
 			>
 				<div slot="tags" v-if="product.sku_display_name != 'standard'">
 					<van-tag plain type="danger">{{product.sku_display_name}}</van-tag>
 				</div>
 			</van-card>
 			<div class="x-i-sum">
-				<span>共{{totalProductCount}}件商品 合计: ¥</span> <span class="x-i-price">{{formatPrice(order.final_money)}}</span>
+				<span>共{{totalProductCount}}件商品 合计: </span> <span class="x-i-price">¥{{formatPrice(order.final_money)}}</span>
 			</div>
 			<div class="x-i-actions">
 				<van-button
-					v-for="(action, index) in actions"
+					v-for="(op, index) in statusInfo.operations"
 					:key="index"
 					plain
 					hairline
 					round 
 					size="small"
-					:type="action.type"
+					:type="op.type"
 					class="ml5"
-					@click="onClickAction(action)"
+					@click.stop="onClickOrderOperation(op)"
 				>
-					{{action.name}}
+					{{op.name}}
 				</van-button>
 			</div>
 		</div>
@@ -46,7 +45,8 @@
 
 <script>
 import { Card, Button, Tag, Toast, Dialog, Notify } from 'vant';
-import OrderService from '@/service/order_service';
+import OrderService from '@/service/order_service'
+import { OrderStatusInfo } from '@/view/order/mixin'
 
 export default {
 	name: 'order-card',
@@ -56,6 +56,8 @@ export default {
 			default: null
 		}
 	},
+
+	mixins: [OrderStatusInfo],
 
 	components: {
 		[Card.name]: Card,
@@ -68,33 +70,7 @@ export default {
 
 	data () {
 		return {
-			name2action: {
-				'pay': {
-					code: 'pay',
-					name: '去付款',
-					type: 'danger',
-				},
-				'review': {
-					code: 'review',
-					name: '评价',
-					type: 'default',
-				}, 
-				'logistics': {
-					code: 'logistics',
-					name: '查看物流',
-					type: 'default',
-				},
-				'finish': {
-					code: 'finish',
-					name: '确认收货',
-					type: 'default'
-				},
-				'reorder': {
-					code: 'reorder',
-					name: '再来一单',
-					type: 'default'
-				}
-			}
+			
 		}
 	},
 
@@ -104,18 +80,6 @@ export default {
 	computed: {
 		products() {
 			return this.order.invoices[0].products
-		},
-
-		statusText() {
-			let status2text = {
-				"wait_confirm": "等待商家确认",
-				"wait_pay": "等待付款",
-				"wait_ship": "买家已付款",
-				"shipped": "商家已发货",
-				"finished": "交易完成"
-			}
-
-			return status2text[this.order.status] || this.order.status;
 		},
 
 		totalPrice() {
@@ -130,16 +94,6 @@ export default {
 				}, 0)
 				return total + count;
 			}, 0)
-		},
-
-		actions() {
-			if (this.order.status == 'shipped') {
-				return [this.name2action['logistics'], this.name2action['finish'], this.name2action['reorder']]
-			} else if (this.order.status == 'finished') {
-				return [this.name2action['review'], this.name2action['logistics'], this.name2action['reorder']]
-			} else {
-				return [this.name2action['pay']]
-			}
 		}
 	},
 
@@ -148,46 +102,25 @@ export default {
 			return (price / 100).toFixed(2);
 		},
 
-		onClickProduct(product) {
+		onClickOrder() {
 			this.$router.push({
-				path: '/product',
+				path: '/order',
 				query: {
-					id: product.id
+					bid: this.order.bid
 				}
 			})
 		},
 
-		onClickAction(action) {
-			if (action.code == 'pay') {
-				this.$router.push({
-					path: '/payment',
-					query: {
-						money: this.order.final_money,
-						order_bid: this.order.bid,
-						order_id: this.order.id
-					}
-				})
-			} else if (action.code == 'finish') {
-				Dialog.confirm({
-					title: '确认收货',
-					message: '确认收货后，订单交易完成，钱款将立即到达商家账户'
-				}).then(() => {
-					setTimeout(async () => {
-						const isSuccess = await OrderService.finishInvoice(this.order.bid)
-						if (isSuccess) {
-							Toast("收货成功")
-							this.status = "finished"
-						} else {
-							Notify("收货失败，请稍后再试")
-						}
-					})
-					alert('confirm')
-				}).catch(() => {
-					alert('cancel')
-				});
-			} else {
-				Toast(action.code)
-			}
+		onClickOrderOperation(op) {
+			this.operateOrder(this.order, op)
+		},
+
+		orderStatusChangeHandler (bid, newStatus) {
+			// 注意: 这是OrderStatusInfo mixin中进行了订单操作之后的回调函数
+			this.$emit('change-status', {
+				bid: bid,
+				newStatus: newStatus
+			})
 		}
 	}
 }
@@ -236,6 +169,7 @@ export default {
 			.x-i-price {
 				font-size: 1.2em;
 				font-weight: 500;
+				color: #f44;
 			}
 		}
 

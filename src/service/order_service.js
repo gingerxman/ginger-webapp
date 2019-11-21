@@ -123,6 +123,23 @@ class OrderService extends Service {
 			}
 		}
 	}
+
+	async cancelOrder(bid) {
+		try {
+			await Resource.put({
+				resource: 'ginger-mall:order.canceled_order',
+				data: {
+					bid: bid,
+					reason: '买家取消'
+				}
+			})
+
+			return true;
+		} catch(e) {
+			console.error(e)
+			return false
+		}
+	}
 }
 
 let service = new OrderService();

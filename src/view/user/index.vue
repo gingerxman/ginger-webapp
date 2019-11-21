@@ -76,7 +76,6 @@ export default {
 
 <style lang="less">
 .x-page-user {
-	padding-bottom: 70px;
 	.x-i-header {
 		background-color: #E7270E;
 		width: 100%;

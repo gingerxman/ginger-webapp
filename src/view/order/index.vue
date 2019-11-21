@@ -1,29 +1,39 @@
 <template>
-<div class="x-page-order">
-	<van-nav-bar
+<div class="x-page-order" v-if="order">
+	<!-- <van-nav-bar
 		title="订单详情"
 		left-text="返回"
 		left-arrow
 		@click-left="onClickLeft" 
-	/>
+	/> -->
 
 	<div class="x-i-statusZone">
-		<div class="x-i-status" v-if="order">
-			{{statusText}}
+		<div class="x-i-status">
+			<van-icon :name="statusInfo.icon" size="30"/>
+			<div class="x-i-status-info">
+				<div class="x-i-status-text">{{statusInfo.text}}</div>
+				<div class="x-i-status-help">{{orderHelp}}</div>
+			</div>
 		</div>
+		<van-steps v-if="order.status != 'canceled'" :active="statusInfo.step">
+			<van-step>买家付款</van-step>
+			<van-step>商家发货</van-step>
+			<van-step>交易完成</van-step>
+		</van-steps>
 	</div>
 
 	<van-cell-group class="x-i-cellGroup mt0">
 		<van-cell icon="location-o" class="x-i-shipInfo">
-			<div v-if="shipInfo && shipInfo.name" class="x-i-user">{{shipInfo.name}} {{shipInfo.phone}}</div>
-			<div v-else class="x-i-user">选择收货地址</div>
-
+			<div class="x-i-user">
+				<div class="x-i-user-name">收货人: {{shipInfo.name}}</div> 
+				<div class="x-i-user-phone">{{shipInfo.phone}}</div>
+			</div>
 			<div v-if="shipInfo && shipInfo.name" class="x-i-area">{{shipInfo.area_name}} {{shipInfo.address}}</div>
 		</van-cell>
 	</van-cell-group>
 
 	<van-card
-		v-for="product in order.products"
+		v-for="product in products"
 		:key="product.id"
 		:title="product.name"
 		:num="product.count"
@@ -32,10 +42,41 @@
 	>
 	</van-card>
 
-	<van-cell-group class="x-i-cellGroup">
+	<van-cell-group class="x-i-cellGroup x-i-orderInfo">
+		<van-cell title="配送方式">
+			<template slot="default">
+				<span>快递 ¥{{formatPrice(postageMoney)}}</span>
+			</template>
+		</van-cell>
+		<van-cell title="买家留言">
+			<template slot="default">
+				<span>{{message ? message : '无'}}</span>
+			</template>
+		</van-cell>
+	</van-cell-group>
+
+	<van-cell-group class="x-i-cellGroup x-i-priceInfo">
+		<van-cell title="商品金额">
+			<template slot="default">
+				<span class="x-i-price">¥ {{formatPrice(productPrice)}}</span>
+			</template>
+		</van-cell>
+		<van-cell title="运费">
+			<template slot="default">
+				<span class="x-i-price">+ ¥ {{formatPrice(postageMoney)}}</span>
+			</template>
+		</van-cell>
+		<van-cell class="x-i-totalMoney">
+			<template slot="default">
+				合计：<span class="x-i-price">¥ {{formatPrice(totalPrice)}}</span>
+			</template>
+		</van-cell>
+	</van-cell-group>
+
+	<van-cell-group v-if="order.status != 'wait_pay'" class="x-i-cellGroup x-i-orderInfo">
 		<van-cell title="订单编号">
 			<template slot="default">
-				<span>{{order.bid}}</span>
+				<span>{{order.status == 'wait_pay' ? order.bid : invoice.bid}}</span>
 			</template>
 		</van-cell>
 		<van-cell title="下单时间">
@@ -43,35 +84,43 @@
 				<span>{{order.created_at}}</span>
 			</template>
 		</van-cell>
-		<van-cell title="留言" v-if="message">
+		<van-cell title="付款时间" v-if="getOperationTime('pay_order')">
 			<template slot="default">
-				<span>{{message}}</span>
+				<span>{{getOperationTime("pay_order")}}</span>
+			</template>
+		</van-cell>
+		<van-cell title="发货时间" v-if="getOperationTime('ship_order')">
+			<template slot="default">
+				<span>{{getOperationTime("ship_order")}}</span>
+			</template>
+		</van-cell>
+		<van-cell title="完成时间" v-if="getOperationTime('finish_order')">
+			<template slot="default">
+				<span>{{getOperationTime("finish_order")}}</span>
 			</template>
 		</van-cell>
 	</van-cell-group>
 
-	<van-cell-group class="x-i-cellGroup">
-		<van-cell title="商品金额">
-			<template slot="default">
-				<span class="x-i-price">{{productPrice}}</span>
-			</template>
-		</van-cell>
-		<van-cell title="运费">
-			<template slot="default">
-				<span class="x-i-price">+ {{postageMoney}}</span>
-			</template>
-		</van-cell>
-		<van-cell class="x-i-totalMoney">
-			<template slot="default">
-				实付款：<span class="x-i-price">{{productPrice}}</span>
-			</template>
-		</van-cell>
-	</van-cell-group>
-
-	<van-goods-action>
-		<van-goods-action-button type="warning" text="申请退款" />
-		<van-goods-action-button type="danger" text="立即购买" />
-	</van-goods-action>
+	<div class="x-i-operations">
+		<template v-if="order.status == 'wait_pay'">
+			<div >合计: <span class="x-i-price">¥ {{formatPrice(totalPrice)}}</span></div>
+			<van-button
+				type="danger"
+				@click.stop="onClickOrderOperation({code:'pay_order'})"
+			>去支付</van-button>
+		</template>
+		<template v-else>
+			<van-button
+				v-for="op in statusInfo.operations"
+				plain
+				:key="op.code"
+				:type="op.type"
+				:round="op.type != 'danger'"
+				:size="op.type == 'danger' ? 'normal' : 'small'"
+				@click.stop="onClickOrderOperation(op)"
+			>{{op.name}}</van-button>
+		</template>
+	</div>
 </div>
 </template>
 
@@ -86,9 +135,13 @@ import {
 	GoodsActionButton,
 	Card,
 	NavBar,
-	Notify
+	Notify,
+	Step,
+	Steps,
+	Icon
 } from 'vant';
 import OrderService from '@/service/order_service'
+import { OrderStatusInfo } from '@/view/order/mixin'
 
 export default {
 	components: {
@@ -101,34 +154,71 @@ export default {
 		[NavBar.name]: NavBar,
 		[Notify.name]: Notify,
 		[GoodsAction.name]: GoodsAction,
-		[GoodsActionButton.name]: GoodsActionButton
+		[GoodsActionButton.name]: GoodsActionButton,
+		[Steps.name]: Steps,
+		[Step.name]: Step,
+		[Icon.name]: Icon,
 	},
 
-	computed: {
-		statusText() {
-			return '已支付，等待商家确认'
-		},
+	mixins: [OrderStatusInfo],
 
+	computed: {
 		totalPrice() {
-			let products = this.order.products;
-			let price = products.reduce((total, item) => total + item.price*item.count, 0);
-			return price;
+			if (!this.order) {
+				return 0
+			}
+
+			return this.order.final_money
 		},
 
 		productPrice() {
-			let products = this.order.products;
-			let price = products.reduce((total, item) => total + item.price*item.count, 0);
-			return '¥ ' + price;
+			if (!this.order) {
+				return 0
+			}
+
+			return this.order.product_price
 		},
 
 		postageMoney() {
-			return '¥ 0'
-		}
+			if (!this.order) {
+				return 0
+			}
+
+			return this.order.postage
+		},
+
+		products () {
+			if (!this.order) {
+				return []
+			}
+
+			if (this.order.status == 'wait_pay') {
+				return this.invoice.products
+			} else {
+				return this.invoice.products
+			}
+		},
+
+		orderHelp () {
+			let status = this.order.status;
+			if (status != "wait_pay") {
+				status = this.invoice.status;
+			}
+
+			if (status == 'wait_pay') {
+				return '请于 18分30秒 内付款，超时订单将自动关闭'
+			} else if (status == 'shipped') {
+				return '还剩7天自动确认完成'
+			}
+		},
+
+
 	},
 
 	data() {
 		return {
 			order: null,
+			invoice: null,
 			shipInfo: null,
 			message: ''
 		};
@@ -138,10 +228,10 @@ export default {
 		setTimeout(async () => {
 			let orderBid = this.$route.query.bid;
 			let order = await OrderService.getOrder(orderBid);
-			this.order = order.invoices[0]
-			this.shipInfo = this.order.ship_info
+			this.order = order;
+			this.invoice = order.invoices[0]
+			this.shipInfo = this.invoice.ship_info
 			this.message = order.message;
-			console.log(this.order)
 		})
 	},
 
@@ -151,7 +241,7 @@ export default {
 		},
 
 		formatPrice(price) {
-			return price.toFixed(2);
+			return (price / 100).toFixed(2);
 		},
 
 		increCount(product) {
@@ -169,8 +259,41 @@ export default {
 			this.$router.push('cart');
 		},
 
-		sorry() {
-			Toast('暂无后续逻辑~');
+		onClickOrderOperation(op) {
+			this.operateOrder(this.order, op)
+		},
+
+		getOperationTime (action) {
+			if (!this.order) {
+				return ''
+			}
+
+			const operationLog = this.order.operation_logs.find(log => {
+				console.log(JSON.stringify(log))
+				return log.action === action
+			})
+			if (operationLog) {
+				return operationLog.created_at
+			} else {
+				return ''
+			}
+		},
+
+		orderStatusChangeHandler (bid, newStatus) {
+			// 注意: 这是OrderStatusInfo mixin中进行了订单操作之后的回调函数
+			if (this.order.bid === bid) {
+				this.order = {
+					...this.order,
+					status: newStatus
+				}
+			}
+
+			if (this.invoice.bid === bid) {
+				this.invoice = {
+					...this.invoice,
+					status: newStatus
+				}
+			}
 		}
 	}
 };
@@ -178,12 +301,11 @@ export default {
 
 <style lang="less">
 .x-page-order {
-	padding-bottom: 50px;
-
 	.x-i-statusZone {
-		background-color: rgba(255, 0, 0, 0.55);
+		// background-color: rgba(255, 0, 0, 0.55);
+		background-color: #FFF;
 		padding: 15px;
-		color: #FFF;
+		padding-bottom: 15px;
 
 		.iconfont {
 			font-size: 1.8rem;
@@ -192,18 +314,54 @@ export default {
 		}
 
 		.x-i-status {
+			display: flex;
+			flex-direction: row;
+			.van-icon {
+				width: 30px;
+				display: block;
+			}
+			&-info {
+				flex: 1;
+				margin-left: 5px;
+			}
+			&-text {
+				display: inline-block;
+				vertical-align: middle;
+				font-weight: bold;
+				font-size: 16px;
+				color: #333;
+			}
+			&-help {
+				color: #666;
+				font-size: 12px;
+				margin-top: 4px;
+				line-height: 14px;
+			}
+		}
+
+		.van-steps {
+			padding-left: 0px;
+			margin-top: 15px;
+
+			&__items {
+				margin: 0px;
+			}
 		}
 	}
 
 	.x-i-cellGroup {
 		margin: 15px 0;
 
+		.van-cell__title {
+			width: 100px;
+			flex: none;
+		}
 		.van-cell__value {
 			color: #333;
 		}
 
 		.x-i-totalMoney {
-			font-size: 1.2em;
+			font-size: 16px;
 
 			.van-cell__value {
 				text-align: right;
@@ -222,12 +380,38 @@ export default {
 		padding-bottom: 20px;
 
 		.x-i-user {
-			color: #333;
+			color: #323233;
+			font-size: 16px;
+			font-weight: 500;
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+
+			&-name {
+				flex: 1;
+			}
+
+			&-phone {
+				text-align: right;
+				width: 120px;
+			}
 		}
 
 		.x-i-area {
-			color: #333;
+			font-size: 12px;
+			color: #666;
 		}
+	}
+	.x-i-shipInfo:after {
+		left: 0;
+		right: 0;
+		bottom: 0;
+		content: "";
+		height: 2px;
+		position: absolute;
+		background: -webkit-repeating-linear-gradient(135deg,#ff6d6d,#ff6d6d 20%,transparent 0,transparent 25%,#3283fa 0,#3283fa 45%,transparent 0,transparent 50%);
+		background: repeating-linear-gradient(-45deg,#ff6d6d,#ff6d6d 20%,transparent 0,transparent 25%,#3283fa 0,#3283fa 45%,transparent 0,transparent 50%);
+		background-size: 80px;
 	}
 
 	.van-card {
@@ -249,6 +433,42 @@ export default {
 
 	.x-i-count {
 		padding: 0px 8px;
+	}
+
+	.x-i-orderInfo {
+		.van-cell {
+			padding: 8px 16px;
+		}
+	}
+
+	.x-i-priceInfo {
+		.van-cell {
+			padding: 8px 16px;
+		}
+	}
+
+	.x-i-operations {
+		z-index: 1;
+		background-color: #FFF;
+		position: fixed;
+		width: 100%;
+		bottom: 0px;
+		display: flex;
+		justify-content: flex-end;
+		height: 44px;
+		line-height: 44px;
+
+		div {
+			line-height: 44px;
+		}
+
+		.van-button {
+			margin-left: 10px;
+		}
+		.van-button--small {
+			margin-top: 7px;
+			margin-right: 10px;
+		}
 	}
 }
 </style>

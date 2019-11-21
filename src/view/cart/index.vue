@@ -48,6 +48,7 @@
 			:price="totalPrice"
 			:disabled="!checkedGoods.length"
 			:button-text="submitBarText"
+			suffix-label="不含运费"
 			@submit="onSubmit"
 		/>
 
@@ -179,6 +180,12 @@ export default {
 		color: #666;
 		text-align: center;
 		text-shadow:0 0 10px #BBB;
+	}
+
+	.van-submit-bar__suffix-label {
+		display: block;
+		color: #888;
+		font-size: 12px;
 	}
 }
 

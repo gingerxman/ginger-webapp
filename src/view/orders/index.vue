@@ -29,6 +29,7 @@
 					v-for="order in orders"
 					:key="order.id"
 					:order="order"
+					@change-status="onChangeOrderStatus"
 				/>
 			</van-list>
 		</van-pull-refresh>
@@ -121,6 +122,20 @@ export default {
 		async onChangeTab(name) {
 			this.orderType = name;
 			await this.loadOrders(true)
+		},
+
+		onChangeOrderStatus (data) {
+			const { bid, newStatus } = data
+			this.orders = this.orders.map(order => {
+				if (order.bid === bid) {
+					return {
+						...order,
+						status: newStatus
+					}
+				} else {
+					return order
+				}
+			})
 		}
 	}
 }

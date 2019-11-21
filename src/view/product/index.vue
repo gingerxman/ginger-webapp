@@ -198,12 +198,15 @@ export default {
 						key2values[propertyValue.property_name] = values;
 					}
 
-					values.push({
-						id: propertyValue.id,
-						name: propertyValue.text,
-						imgUrl: propertyValue.image,
-						previewImgUrl: propertyValue.image,
-					})
+					const existedValue = values.find(value => value.id === propertyValue.id)
+					if (!existedValue) {
+						values.push({
+							id: propertyValue.id,
+							name: propertyValue.text,
+							imgUrl: propertyValue.image,
+							previewImgUrl: propertyValue.image,
+						})
+					}
 
 					let keyStr = `property_${propertyValue.property_id}`
 					property2value[keyStr] = propertyValue.id
@@ -240,6 +243,7 @@ export default {
 			this.sku.tree = properties;
 			this.sku.list = list;
 			this.sku.stock_num = totalStocks;
+			console.log(this.sku)
 		},
 
 		buyProduct(skuName, count) {
