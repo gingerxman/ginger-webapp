@@ -12,8 +12,11 @@
 			<div class="goods-price">{{ formatPrice }}</div>
 		</van-cell>
 		<van-cell class="goods-express">
-			<van-col span="10">运费：{{ postage }}</van-col>
-			<van-col span="14">剩余：{{ sku.stock_num }}</van-col>
+			<div>运费：<span class="x-i-postageMoney">{{ postage }}</span></div>
+			<div class="x-i-soldAndStock">
+				<span class="x-i-soldCount">已售: {{ product.sold_count }}</span>
+				<span class="x-i-stocks">剩余：{{ sku.stock_num }}</span>
+			</div>
 		</van-cell>
 	</van-cell-group>
 
@@ -131,7 +134,11 @@ export default {
 		postage () {
 			const logisticsInfo = this.product.logistics_info
 			if (logisticsInfo.postage_type === 'unified') {
-				return (logisticsInfo.unified_postage_money / 100).toFixed(2)
+				if (logisticsInfo.unified_postage_money === 0) {
+					return '免运费'
+				} else {
+					return '¥ ' + (logisticsInfo.unified_postage_money / 100).toFixed(2)
+				}
 			} else {
 				return '免运费'
 			}
@@ -325,9 +332,34 @@ export default {
 	}
 
 	&-express {
-		color: #999;
+		color: #969799;
 		font-size: 12px;
 		padding: 5px 15px;
+		padding-right: 0px;
+
+		.van-cell__value--alone {
+			display: flex;
+			flex-direction: row;
+			justify-content: space-between;
+			color: #969799;
+
+			div {
+				flex: 1;
+			}
+
+			.x-i-postageMoney {
+				color: #323233;
+			}
+
+			.x-i-soldCount {
+				width: 300px;
+			}
+			.x-i-soldCount::after {
+				content: '|';
+				margin: 0 5px;
+				color: #dcdee0;
+			}
+		}
 	}
 
 	&-cell-group {
@@ -366,6 +398,9 @@ export default {
 			display: block;
 			width: 100%;
 		}
+	}
+
+	.x-i-soldCount {
 	}
 }
 </style>

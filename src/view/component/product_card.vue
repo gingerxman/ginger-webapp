@@ -13,7 +13,7 @@
 			</a>
 			<div class="x-i-bottomBar">
 				<div class="x-i-price">{{formatPrice}}</div>
-			<span class="x-i-sales">已售:20</span>
+			<span class="x-i-sales">已售: {{product.sold_count}}</span>
 				<button type="button" class="x-i-icon-addCart"></button>
 			</div>
 		</div>
