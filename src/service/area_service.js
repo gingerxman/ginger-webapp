@@ -13,7 +13,7 @@ class AreaService extends Service {
 	async getYouzanAreaList() {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:area.youzan_area_list',
+				resource: 'ginger-account:area.youzan_area_list',
 				data: {
 				}
 			})
