@@ -88,6 +88,11 @@ const OrderStatusInfo = {
 
 	methods: {
 		gotoPaymentPage (order) {
+      if (order.type === 'invoice') {
+        // 如果支付的是发货单，则转换为其对应的订单
+        order = order.parentOrder
+      }
+
 			this.$router.push({
 				path: '/payment',
 				query: {

@@ -14,7 +14,7 @@ class OrderService extends Service {
 	async getPurchaseData(productInfos) {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.purchase_data',
+				resource: 'ginger-order:mall.purchase_data',
 				data: {
 					product_infos: productInfos
 				}
@@ -30,7 +30,7 @@ class OrderService extends Service {
 	async createOrder(products, cartItemIds, shipInfo, message) {
 		try {
 			let resp = await Resource.put({
-				resource: 'ginger-mall:order.order',
+				resource: 'ginger-order:order.order',
 				data: {
 					products: JSON.stringify(products),
 					shopping_cart_item_ids: cartItemIds,
@@ -52,7 +52,7 @@ class OrderService extends Service {
 	async payedOrder(orderBid) {
 		try {
 			await Resource.put({
-				resource: 'ginger-mall:order.payed_order',
+				resource: 'ginger-order:order.payed_order',
 				data: {
 					bid: orderBid
 				}
@@ -68,7 +68,7 @@ class OrderService extends Service {
 	async finishInvoice(bid) {
 		try {
 			await Resource.put({
-				resource: 'ginger-mall:order.finished_invoice',
+				resource: 'ginger-order:order.finished_invoice',
 				data: {
 					bid: bid
 				}
@@ -84,7 +84,7 @@ class OrderService extends Service {
 	async getOrder(orderBid) {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:order.order',
+				resource: 'ginger-order:order.order',
 				data: {
 					bid: orderBid
 				}
@@ -99,7 +99,7 @@ class OrderService extends Service {
 
 	async getOrders(type) {
 		try {
-			let resource = 'ginger-mall:order.user_orders';
+			let resource = 'ginger-order:order.user_orders';
 			let pageinfo = this.getPageInfo(resource, 3)
 			let resp = await Resource.get({
 				resource: resource,
@@ -127,7 +127,7 @@ class OrderService extends Service {
 	async cancelOrder(bid) {
 		try {
 			await Resource.put({
-				resource: 'ginger-mall:order.canceled_order',
+				resource: 'ginger-order:order.canceled_order',
 				data: {
 					bid: bid,
 					reason: '买家取消'

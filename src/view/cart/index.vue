@@ -125,7 +125,7 @@ export default {
 				}
 			})
 
-			let cartItemIds = products.map(product => product.shopping_cart_item_id)
+			let cartItemIds = products.map(product => product.cart_item_id)
 
 			let code = products.map(product => {
 				return `${product.id}.${product.purchase_count}.${product.sku_name}`
@@ -141,7 +141,8 @@ export default {
 		},
 
 		async onClickDelete(product) {
-			let isSuccess = await ShoppingCartService.deleteProduct(product.shopping_cart_item_id);
+      console.log(product)
+			let isSuccess = await ShoppingCartService.deleteProduct(product.cart_item_id);
 			if (isSuccess) {
 				this.products = this.products.filter(oneProduct => {
 					return oneProduct.id != product.id;

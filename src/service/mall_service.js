@@ -14,7 +14,7 @@ class MallService extends Service {
 		this.reset()
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.ship_infos',
+				resource: 'ginger-order:mall.ship_infos',
 				data: {
 				}
 			})
@@ -31,7 +31,7 @@ class MallService extends Service {
 		let shipInfo = this.getCache('shipInfos').get(id)
 		if (!shipInfo) {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.ship_info',
+				resource: 'ginger-order:mall.ship_info',
 				data: {
 					id: id
 				}
@@ -46,7 +46,7 @@ class MallService extends Service {
 	async createShipInfo(name, phone, areaCode, address) {
 		try {
 			let resp = await Resource.put({
-				resource: 'ginger-mall:mall.ship_info',
+				resource: 'ginger-order:mall.ship_info',
 				data: {
 					name: name,
 					phone: phone,
@@ -65,7 +65,7 @@ class MallService extends Service {
 	async updateShipInfo(id, name, phone, areaCode, address) {
 		try {
 			await Resource.post({
-				resource: 'ginger-mall:mall.ship_info',
+				resource: 'ginger-order:mall.ship_info',
 				data: {
 					id: id,
 					name: name,
@@ -85,7 +85,7 @@ class MallService extends Service {
 	async setDefaultShipInfo(shipInfoId) {
 		try {
 			await Resource.put({
-				resource: 'ginger-mall:mall.default_ship_info',
+				resource: 'ginger-order:mall.default_ship_info',
 				data: {
 					id: shipInfoId,
 				}
@@ -100,7 +100,7 @@ class MallService extends Service {
 
 	async getDefaultShipInfo() {
 		let resp = await Resource.get({
-			resource: 'ginger-mall:mall.default_ship_info',
+			resource: 'ginger-order:mall.default_ship_info',
 			data: {
 			}
 		})
@@ -111,7 +111,7 @@ class MallService extends Service {
 	async deleteShipInfo(shipInfoId) {
 		try {
 			await Resource.delete({
-				resource: 'ginger-mall:mall.ship_info',
+				resource: 'ginger-order:mall.ship_info',
 				data: {
 					id: shipInfoId,
 				}

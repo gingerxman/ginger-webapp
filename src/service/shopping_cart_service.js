@@ -13,7 +13,7 @@ class ShoppingCartService extends Service {
 	async getProductCount() {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.shopping_cart_product_count',
+				resource: 'ginger-product:cart.product_count',
 				data: {
 				}
 			})
@@ -32,7 +32,7 @@ class ShoppingCartService extends Service {
 		} else {
 			try {
 				let resp = await Resource.put({
-					resource: 'ginger-mall:mall.shopping_cart_item',
+					resource: 'ginger-product:cart.cart_item',
 					data: {
 						pool_product_id: productId,
 						sku_name: skuName,
@@ -51,7 +51,7 @@ class ShoppingCartService extends Service {
 	async getProducts() {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.shopping_cart',
+				resource: 'ginger-product:cart.cart',
 				data: {
 				}
 			})
@@ -77,7 +77,7 @@ class ShoppingCartService extends Service {
 	async deleteProduct(itemId) {
 		try {
 			await Resource.delete({
-				resource: 'ginger-mall:mall.shopping_cart_item',
+				resource: 'ginger-product:cart.cart_item',
 				data: {
 					id: itemId
 				}

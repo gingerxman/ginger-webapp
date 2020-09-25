@@ -13,7 +13,7 @@ class ProductService extends Service {
 	async getProducts() {
 		try {
 			let resp = await Resource.get({
-				resource: 'ginger-mall:mall.products',
+				resource: 'ginger-product:product.onshelf_products',
 				data: {
 					_p_from: 0,
 					_p_count: 20,
@@ -35,7 +35,7 @@ class ProductService extends Service {
 		} else {
 			try {
 				let resp = await Resource.get({
-					resource: 'ginger-mall:mall.product',
+					resource: 'ginger-product:product.product',
 					data: {
 						id: productId
 					}

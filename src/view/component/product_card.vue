@@ -12,9 +12,13 @@
 				<h2 class="x-i-promotionTitle">{{product.base_info.promotion_title}}</h2>
 			</a>
 			<div class="x-i-bottomBar">
-				<div class="x-i-price">{{formatPrice}}</div>
-			<span class="x-i-sales">已售: {{product.sold_count}}</span>
-				<button type="button" class="x-i-icon-addCart"></button>
+        <div class="left">
+          <div class="x-i-price">{{formatPrice}}</div>
+          <span class="x-i-sales">已售: {{product.sold_count}}</span>
+        </div>
+        <div class="right">
+          <van-icon name="shopping-cart-o" style="font-size:20px;"/>
+        </div>
 			</div>
 		</div>
 	</div>
@@ -22,8 +26,17 @@
 
 
 <script>
+import {
+	Icon
+} from 'vant';
+
 export default {
-	name: 'product-card',
+  name: 'product-card',
+  
+  components: {
+		[Icon.name]: Icon,
+  },
+  
 	props: {
 		product: {
 			type: Object,
@@ -69,7 +82,7 @@ export default {
 	.x-i-card {
 		box-shadow: 0 1px 2px rgba(0,0,0,.2);
 		border-radius: 0px;
-		padding: 5px 5px 0;
+		padding: 8px 8px 0 8px;
 		display: block;
 
 		a {
@@ -122,18 +135,29 @@ export default {
 		.x-i-bottomBar {
 			font-size: 15px;
 			height: 36px;
-			line-height: 36px;
+      line-height: 36px;
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
 
-			.x-i-price {
-				display: inline-block;
-				color: #FF5613;
-				font-weight: bold;
-			}
+      .left {
+        flex: 1;
+        .x-i-price {
+          display: inline-block;
+          color: #FF5613;
+          font-weight: bold;
+        }
 
-			.x-i-sales {
-				font-size: 13px;
-				margin-left: 15px;
-			}
+        .x-i-sales {
+          font-size: 13px;
+          margin-left: 15px;
+        }
+      }
+
+      .right {
+        height: 33px;
+      }
 		}
 		.x-i-promotionTitle {
 			font-family: "PingFang SC", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", Helvetica, Arial,
